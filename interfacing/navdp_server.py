@@ -1,13 +1,15 @@
 import argparse
 import datetime
+import io
 import json
 import os
+import pickle
 import time
 
 import cv2
 import imageio
 import numpy as np
-from flask import Flask, jsonify, request
+from flask import Flask, Response, g, jsonify, request
 from PIL import Image, ImageDraw, ImageFont
 from policy_agent import NavDP_Agent
 
@@ -23,6 +25,39 @@ args = parser.parse_known_args()[0]
 app = Flask(__name__)
 navdp_navigator = None
 navdp_fps_writer = None
+
+os.makedirs("/workspace/recording", exist_ok=True)
+
+
+@app.before_request
+def pickle_request() -> None:
+    g.pickle_ts = time.time_ns()
+
+    collected = {}
+    collected["endpoint"] = request.endpoint
+    if request.is_json:
+        collected["json"] = request.get_json()
+
+    collected["files"] = {}
+    for file_key, file_val in request.files.items():
+        buff = io.BytesIO()
+        file_val.save(buff)
+        collected["files"][file_key] = buff.getvalue()
+        buff.close()
+
+    collected["form"] = {}
+    for form_key, form_val in request.form.items():
+        collected["form"][form_key] = form_val
+
+    with open(f"/workspace/recording/{g.pickle_ts}_{request.endpoint}_req", "wb") as fp:
+        pickle.dump(collected, fp)
+
+
+@app.after_request
+def pickle_response(response: Response) -> Response:
+    with open(f"/workspace/recording/{g.pickle_ts}_resp", "wb") as fp:
+        pickle.dump(response.get_json(), fp)
+    return response
 
 
 @app.route("/navigator_reset", methods=["POST"])
@@ -340,4 +375,4 @@ def navdp_step_ip_mixgoal():
 
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=args.port)
+    app.run(host="0.0.0.0", port=args.port)

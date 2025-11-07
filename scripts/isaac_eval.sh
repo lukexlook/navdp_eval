@@ -1,15 +1,15 @@
 source .venv/bin/activate
 cd NavDP
 
-export total=$(ls -1 assets/scenes/internscenes_home/scenes_home/ | wc -l)
+sed -i -e \
+    's/os\.listdir(args_cli\.scene_dir)/sorted(os.listdir(args_cli.scene_dir))/g' \
+    eval_pointgoal_wheeled.py
 
-for (( i=0; i<total; i++ )); do \
-    python eval_pointgoal_wheeled.py \
-        --port 8888 \
-        --scene_dir /workspace/NavDP/assets/scenes/internscenes_home/scenes_home \
-        --scene_index $i \
-        --scene_scale 0.01; \
-done
+python eval_pointgoal_wheeled.py \
+    --port 8888 \
+    --scene_dir /workspace/NavDP/assets/scenes/internscenes_home/scenes_home \
+    --scene_index 0 \
+    --scene_scale 0.01
 
 # Errors like
 # - [Error] [omni.physx.plugin] Physics scenes...
