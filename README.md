@@ -4,7 +4,7 @@
 > Nonetheless, for research purposes, we are not that sensitive to the image size,
 > so we just keep it there.
 
-> [!NOTE]
+> [!IMPORTANT]
 > For [base3_lab](./base3_lab/), the build process
 > is incomplete and requires additional manual steps.
 >

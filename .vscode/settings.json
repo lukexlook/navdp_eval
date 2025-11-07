@@ -11,7 +11,11 @@
         "black"
     ],
     "cSpell.words": [
-        "mypy"
+        "ckpt",
+        "daocloud",
+        "mypy",
+        "navdp",
+        "venv"
     ],
     "files.exclude": {
         "**/.mypy_cache": true,
